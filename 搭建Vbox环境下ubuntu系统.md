@@ -2,11 +2,13 @@
 本文借鉴内容：1.Vbox虚拟机ssd体验NVMe:https://www.jianshu.com/p/df3b3d558b4b     
 2.Vbox窗口分辨率修改或自适应系统:https://blog.csdn.net/snake_baby/article/details/112304800
 3.Vbox虚拟机系统和物理机系统的IO共享:https://www.freesion.com/article/8965410193/
+4.Vbox虚拟机系统安装增强功能:https://blog.csdn.net/OrdinaryMatthew/article/details/124040107
 ## 总结
 + 用virtualBox而不是Vmware
 + 下载高版本的ubuntu(不然登录密码会有问题)
 + VirtualBox窗口分辨率如果在全局设置和虚拟机系统设置里都修改无作用，加载Vbox扩展包之后，尝试直接修改虚拟系统的系统分辨率，Vbox窗口很可能去自适应该分辨率。
-+ Vbox的ubuntu使用SSD固态的办法详见（三）下的问题三。   
++ Vbox的ubuntu使用SSD固态的办法详见（三）下的问题三。
++ Vbox实现IO口双向共享见（三）下的问题四。   
 ### （一）背景
 做MNP人群离网率及原因探索的数据挖掘任务时，相关系数训练的Python脚本在一个我们winserver的32核服务器上运行时，每一个脚本在jupyter lab或者notebook中都只会单核运行，导致每一万轮训练需要接近1小时，训练100万次的一个脚本需要跑4天，在尝试诸多方法无果之后，目前方法为每次修改一个脚本，放到服务器上跑，同时跑多个脚本，但每一个都要跑4天。于是乎，尝试将100次训练过程做成多线程模式的需求应运而生。项目内容详见project文件“Churn_m_analyse”。
    ***
@@ -25,4 +27,10 @@ Vmware当然是更好用的，但是目前搜到的官网版本是要付费的�
 + 问题三，因为分配给Vbox下虚拟系统的硬盘是固态的，所以如果想要用到固态硬盘启动，就要修改默认设置里的一些配置（不修改也可以用SATA方式启动），系统——>设置——>存储——>点击"控制器：SATA"后，在右侧的"型号(T)"里把AHCI改成NVMe,(vbox存储默认是AHCI的，高级主机控制器接口，英文：Advanced Host Controller Interface，缩写：AHCI)。   
 但是这样操作之后，ubuntu的启动器会无法启动，所以需要到VBox的设置里，系统——>设置——>系统———>主板，这一栏里最下面，"启用EFI"勾选栏选上，这样操作系统可以正常启动。好像最新的ubuntu现在都是用的efi启动，NVMe必须选中efi支持才能正常引导启动ubuntu。
 + 问题四，Vbox虚拟机系统和物理机之间文件传输和复制粘贴IO共享的问题，刚搭建好系统时，是无法通用IO的，处理办法初步如下，系统——>设置——>常规——>高级，这一栏下的"共享粘贴板"和"拖放"功能从"禁用"改为"双向"，以及，系统——>设置——>存储——>点击"控制器：勾选"使用主机输入输出（I/O）缓存"，及下面.vdi一栏里，勾选"固态驱动器"，以上方法皆无用。怀疑是解决分辨率的问题的时候，Vbox安装了扩展选项，导致的失效，重新在系统——>设置——>存储——>控制器:IDE下删除了默认的"VBoxGuestAddtions.iso"扩展，改用下载的"VBoxGuestAddtions_6.1.36.iso"。
+最后一步需要安装VirtualBox增强功能，首先在上一段末尾在控制器下加载了最新的"VBoxGuestAddtions_6.1.36.iso"，再次打开ubuntu系统后可以看到CD镜像多了一个加载的光盘，可以双击进入该光盘，查看是否存在一个"VBoxLinuxAdditions.run"的文件，如果存在，那么从shell进入这个文件夹，运行这个run文件。
+```bash
+cd /media/reagan/VBox_GAs_6.1.36
+sudo ./VBoxLinuxAdditions.run
+```
+在完成安装以后，需要重启ubuntu,可以用reboot命令直接重启。重启后检查ubuntu窗口上方，设备——>共享粘贴板，是否是"双向"
 ***
