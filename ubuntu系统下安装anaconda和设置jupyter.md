@@ -12,3 +12,32 @@
 bash Anaconda3-2022.05-Linux-x86_64.sh
 ```
 3. 之后不断的按enter和输入yes，就可以一路执行安装过程，安装完成后，会在默认的Home/reagan目录下创建一个/anaconda3/文件夹来存放安装的好的软件。
+4. 安装完成后更新环境变量
+```bash
+source ~/.bashrc
+```
+5. 此时可以在bash中运行,升级conda和安装jupyter notebook命令来测试环境变量是否添加完成。
+```bash
+conda update conda
+
+conda install jupyter notebook
+```
+### （三）jupyter notebook的设置
+此时在bash命令行输入anaconda-navigator可以启动导航器，我们手动开启jupyter notebook，会默认打开firefox浏览器，但是很大概率会发生"页面载入出错"，这是兼容性的问题，可以通过修改默认浏览器到chrome来解决，也可以通过修改掉不使用"页面重定向"的config文件来解决。   
+解决方法生成notebook配置文件，设置为不使用页面重定向。   
+1. 生成notebook配置文件
+```bash
+jupyter notebook --generate-config
+```
+配置文件路径为：/home/username/.jupyter/jupyter_notebook_config.py 
+
+2. 如果没有在ubuntu中设置显示隐藏文件夹，则可以通过cd命令进入该文件夹，直接使用bash命令打开。
+```bash
+open jupyter_notebook_config.py
+```
+在设置文件中加入下面语句
+```python
+c.NotebookApp.use_redirect_file = False
+```
+就可以成功。   
+3. 完成后建议重启一次anaconda使生效。
